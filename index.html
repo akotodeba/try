@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Shekinah's @18</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  background: url('https://i.imgur.com/AUfRfam.jpeg') center/cover no-repeat fixed;
+  font-family: Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  margin:0;
+}
+.overlay {
+  background: rgba(0,0,0,0.45);
+  position:absolute;
+  inset:0;
+}
+.card {
+  position:relative;
+  background:#fff;
+  padding:25px;
+  width:90%;
+  max-width:330px;
+  border-radius:18px;
+  text-align:center;
+  z-index:1;
+}
+h1 { color:#800000; margin-bottom:10px; }
+input, select, button {
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #800000;
+}
+button {
+  background:#800000;
+  color:#fff;
+  border:none;
+}
+.hidden { display:none; }
+#thanks {
+  margin-top:15px;
+  color:#800000;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+<div class="overlay"></div>
+
+<div class="card">
+  <h1>Shekinah's @18</h1>
+
+  <input id="name" placeholder="Full Name">
+  <button onclick="search()">Search</button>
+
+  <form id="form" class="hidden" onsubmit="submitRSVP(event)">
+    <select id="attendance" required>
+      <option value="">Will you attend?</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+    <button type="submit">Confirm RSVP</button>
+  </form>
+
+  <div id="thanks"></div>
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwYK4MlY6jgSHyCD--6RKdc_6ox37fmbLWMk67NdxskutHCS3QEy2NAHQZ7ySsJU10X/exec";
+let currentGroup = [];
+
+function search() {
+  const name = document.getElementById("name").value.trim();
+  fetch(SCRIPT_URL + "?name=" + encodeURIComponent(name))
+    .then(r => r.json())
+    .then(d => {
+      if (d.found) {
+        currentGroup = d.group;
+        document.getElementById("form").classList.remove("hidden");
+      } else {
+        alert("Name not on the guest list");
+      }
+    });
+}
+
+function submitRSVP(e) {
+  e.preventDefault();
+  const attendance = document.getElementById("attendance").value;
+
+  const formData = new URLSearchParams();
+  formData.append("names", currentGroup.join(","));
+  formData.append("attendance", attendance);
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    body: formData
+  }).then(() => {
+    document.getElementById("form").classList.add("hidden");
+    document.getElementById("thanks").innerText =
+      attendance === "Yes"
+        ? "Thank you for attending Shekinah's @18!"
+        : "Thank you for letting us know.";
+  });
+}
+</script>
+</body>
+</html>
